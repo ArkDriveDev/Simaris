@@ -1,9 +1,9 @@
 {
-  "name": "it35-lab",
+  "name": "simaris",
   "private": true,
   "version": "0.0.1",
   "type": "module",
-  "homepage": "https://arkdrivedev.github.io/it35-lab/",
+  "homepage": "https://arkdrivedev.github.io/Simaris/",
   "scripts": {
     "predeploy" : "npm run build",
     "deploy" : "gh-pages -d dist",

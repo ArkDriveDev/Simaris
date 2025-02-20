@@ -14,7 +14,7 @@ import {
     const navigation = useIonRouter();
 
     const doLogin = () => {
-        navigation.push('/it35-lab/app','forward','replace');
+        navigation.push('/simaris/app','forward','replace');
     }
     return (
       <IonPage>
