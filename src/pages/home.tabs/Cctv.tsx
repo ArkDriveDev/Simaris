@@ -6,6 +6,7 @@ const Cctv: React.FC = () => {
   const [recording, setRecording] = useState<boolean>(false);
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const recordedChunks = useRef<Blob[]>([]);
+  const videoRef = useRef<HTMLVideoElement | null>(null); // Ref for the live video element
 
   const startRecording = async () => {
     try {
@@ -13,6 +14,12 @@ const Cctv: React.FC = () => {
         video: true,
         audio: true,
       });
+
+      // Connect the stream to the video element for live preview
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
 
       mediaRecorder.current = new MediaRecorder(stream);
       recordedChunks.current = [];
@@ -27,6 +34,9 @@ const Cctv: React.FC = () => {
         const videoBlob = new Blob(recordedChunks.current, { type: 'video/mp4' });
         const videoUrl = URL.createObjectURL(videoBlob);
         setVideoUrl(videoUrl);
+
+        // Stop all tracks in the stream to release the camera
+        stream.getTracks().forEach((track) => track.stop());
       };
 
       mediaRecorder.current.start();
@@ -61,6 +71,14 @@ const Cctv: React.FC = () => {
           </IonButton>
         )}
 
+        {/* Live video feed */}
+        <video
+          ref={videoRef}
+          style={{ width: '100%', marginTop: '20px', display: recording ? 'block' : 'none' }}
+          muted // Muted to avoid feedback from audio
+        />
+
+        {/* Recorded video playback */}
         {videoUrl && (
           <video controls style={{ width: '100%', marginTop: '20px' }}>
             <source src={videoUrl} type="video/mp4" />

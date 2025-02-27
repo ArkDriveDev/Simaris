@@ -15,7 +15,7 @@ import {
       IonToolbar 
   } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import { bookOutline, search, star } from 'ionicons/icons';
+import { cameraOutline, search, bookOutline } from 'ionicons/icons';
 import { Route, Redirect } from 'react-router';
 
 import Favorites from './home.tabs/Favorites';
@@ -25,9 +25,9 @@ import Search from './home.tabs/Search';
   const Home: React.FC = () => {
 
     const tabs = [
-      {name:'Cctv', tab:'cctv',url: '/simaris/app/home/cctv', icon: bookOutline},
+      {name:'Cctv', tab:'cctv',url: '/simaris/app/home/cctv', icon: cameraOutline},
       {name:'Search', tab:'search', url: '/simaris/app/home/search', icon: search},
-      {name:'Favorites',tab:'favorites', url: '/simaris/app/home/favorites', icon: star},
+      {name:'Favorites',tab:'favorites', url: '/simaris/app/home/favorites', icon: bookOutline},
     ]
     
     return (
