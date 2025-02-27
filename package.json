@@ -5,8 +5,8 @@
   "type": "module",
   "homepage": "https://arkdrivedev.github.io/Simaris/",
   "scripts": {
-    "predeploy" : "npm run build",
-    "deploy" : "gh-pages -d dist",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
@@ -16,7 +16,9 @@
   },
   "dependencies": {
     "@capacitor/app": "7.0.0",
+    "@capacitor/camera": "^7.0.0",
     "@capacitor/core": "7.0.1",
+    "@capacitor/filesystem": "^7.0.0",
     "@capacitor/haptics": "7.0.0",
     "@capacitor/keyboard": "7.0.0",
     "@capacitor/status-bar": "7.0.0",

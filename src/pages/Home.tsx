@@ -19,13 +19,12 @@ import { bookOutline, search, star } from 'ionicons/icons';
 import { Route, Redirect } from 'react-router';
 
 import Favorites from './home.tabs/Favorites';
-import Feed from './home.tabs/Feed';
 import Search from './home.tabs/Search';
   
   const Home: React.FC = () => {
 
     const tabs = [
-      {name:'Feed', tab:'feed',url: '/simaris/app/home/feed', icon: bookOutline},
+      {name:'Cctv', tab:'cctv',url: '/simaris/app/home/cctv', icon: bookOutline},
       {name:'Search', tab:'search', url: '/simaris/app/home/search', icon: search},
       {name:'Favorites',tab:'favorites', url: '/simaris/app/home/favorites', icon: star},
     ]
@@ -45,7 +44,7 @@ import Search from './home.tabs/Search';
           </IonTabBar>
         <IonRouterOutlet>
 
-          <Route exact path="/simaris/app/home/feed" render={Feed} />
+          <Route exact path="/simaris/app/home/cctv" render={Cctv} />
           <Route exact path="/simaris/app/home/search" render={Search} />
           <Route exact path="/simaris/app/home/favorites" render={Favorites} />
 
