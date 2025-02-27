@@ -4,7 +4,6 @@ const config: CapacitorConfig = {
   appId: 'com.example.app',
   appName: 'simaris',
   webDir: 'dist', // Ensure this points to your build output directory
-  bundledWebRuntime: false,
 };
 
 export default config;

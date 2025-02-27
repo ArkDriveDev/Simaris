@@ -1,34 +1,45 @@
-import React, { useState } from 'react';
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButton, IonIcon } from '@ionic/react';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { Filesystem, Directory } from '@capacitor/filesystem';
+import React, { useState, useRef } from 'react';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButton } from '@ionic/react';
 
 const Cctv: React.FC = () => {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [recording, setRecording] = useState<boolean>(false);
+  const mediaRecorder = useRef<MediaRecorder | null>(null);
+  const recordedChunks = useRef<Blob[]>([]);
 
-  const recordVideo = async () => {
+  const startRecording = async () => {
     try {
-      const video = await Camera.getVideo({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-        source: CameraSource.Camera,
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
       });
 
-      setVideoUrl(video.webPath || null);
+      mediaRecorder.current = new MediaRecorder(stream);
+      recordedChunks.current = [];
 
-      // Save the video to the device's file system
-      if (video.path) {
-        const savedFile = await Filesystem.writeFile({
-          path: `videos/${new Date().getTime()}.mp4`,
-          data: await fetch(video.webPath!).then((res) => res.blob()),
-          directory: Directory.Data,
-        });
+      mediaRecorder.current.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          recordedChunks.current.push(event.data);
+        }
+      };
 
-        console.log('Video saved:', savedFile.uri);
-      }
+      mediaRecorder.current.onstop = () => {
+        const videoBlob = new Blob(recordedChunks.current, { type: 'video/mp4' });
+        const videoUrl = URL.createObjectURL(videoBlob);
+        setVideoUrl(videoUrl);
+      };
+
+      mediaRecorder.current.start();
+      setRecording(true);
     } catch (error) {
-      console.error('Error recording video:', error);
+      console.error('Error starting video recording:', error);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder.current) {
+      mediaRecorder.current.stop();
+      setRecording(false);
     }
   };
 
@@ -40,9 +51,16 @@ const Cctv: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding">
-        <IonButton expand="block" onClick={recordVideo}>
-          Record Video
-        </IonButton>
+        {!recording ? (
+          <IonButton expand="block" onClick={startRecording}>
+            Start Recording
+          </IonButton>
+        ) : (
+          <IonButton expand="block" color="danger" onClick={stopRecording}>
+            Stop Recording
+          </IonButton>
+        )}
+
         {videoUrl && (
           <video controls style={{ width: '100%', marginTop: '20px' }}>
             <source src={videoUrl} type="video/mp4" />
