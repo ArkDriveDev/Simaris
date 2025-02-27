@@ -18,7 +18,7 @@ import { IonReactRouter } from '@ionic/react-router';
 import { cameraOutline, search, bookOutline } from 'ionicons/icons';
 import { Route, Redirect } from 'react-router';
 
-import Favorites from './home.tabs/Favorites';
+import Records from './home.tabs/Records';
 import Cctv from './home.tabs/Cctv';
 import Search from './home.tabs/Search';
   
@@ -27,7 +27,7 @@ import Search from './home.tabs/Search';
     const tabs = [
       {name:'Cctv', tab:'cctv',url: '/simaris/app/home/cctv', icon: cameraOutline},
       {name:'Search', tab:'search', url: '/simaris/app/home/search', icon: search},
-      {name:'Favorites',tab:'favorites', url: '/simaris/app/home/favorites', icon: bookOutline},
+      {name:'Records',tab:'records', url: '/simaris/app/home/records', icon: bookOutline},
     ]
     
     return (
@@ -47,7 +47,7 @@ import Search from './home.tabs/Search';
 
           <Route exact path="/simaris/app/home/cctv" component={Cctv} />
           <Route exact path="/simaris/app/home/search" render={Search} />
-          <Route exact path="/simaris/app/home/favorites" render={Favorites} />
+          <Route exact path="/simaris/app/home/records" render={Records} />
 
           <Route exact path="/simaris/app/home">
             <Redirect to="/simaris/app/home/search" />
