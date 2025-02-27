@@ -19,6 +19,7 @@ import { bookOutline, search, star } from 'ionicons/icons';
 import { Route, Redirect } from 'react-router';
 
 import Favorites from './home.tabs/Favorites';
+import Cctv from './home.tabs/Cctv';
 import Search from './home.tabs/Search';
   
   const Home: React.FC = () => {
@@ -44,12 +45,12 @@ import Search from './home.tabs/Search';
           </IonTabBar>
         <IonRouterOutlet>
 
-          <Route exact path="/simaris/app/home/cctv" render={Cctv} />
+          <Route exact path="/simaris/app/home/cctv" component={Cctv} />
           <Route exact path="/simaris/app/home/search" render={Search} />
           <Route exact path="/simaris/app/home/favorites" render={Favorites} />
 
           <Route exact path="/simaris/app/home">
-            <Redirect to="/simaris/app/home/feed" />
+            <Redirect to="/simaris/app/home/search" />
           </Route>
 
         </IonRouterOutlet>
