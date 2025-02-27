@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButton, IonAlert } from '@ionic/react';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButton } from '@ionic/react';
 
 const Cctv: React.FC = () => {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
@@ -10,7 +10,6 @@ const Cctv: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
-  const alertCooldownRef = useRef<boolean>(false); // Prevents spamming alerts
 
   const startRecording = async () => {
     try {
@@ -71,72 +70,50 @@ const Cctv: React.FC = () => {
 
     if (!video || !canvas || !ctx) return;
 
-    // Set canvas dimensions to match video
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    video.onloadedmetadata = () => {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
 
-    let previousFrame: ImageData | null = null;
+      let previousFrame: ImageData | null = null;
 
-    const processFrame = () => {
-      if (!video || !canvas || !ctx) return;
+      const processFrame = () => {
+        if (!video || !canvas || !ctx) return;
 
-      // Draw the current video frame onto the canvas
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const currentFrame = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-      // Get the current frame's pixel data
-      const currentFrame = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-      if (previousFrame) {
-        // Compare the current frame with the previous frame
-        const motion = compareFrames(previousFrame, currentFrame);
-
-        if (motion && !alertCooldownRef.current) {
-          alertCooldownRef.current = true;
-          setMotionDetected(false); // Reset first
-          setTimeout(() => {
-            setMotionDetected(true);
-            alertCooldownRef.current = false; // Allow alert after cooldown
-          }, 2000); // 2-second cooldown
+        if (previousFrame) {
+          const motion = compareFrames(previousFrame, currentFrame);
+          if (motion) {
+            console.log("🔴 Motion detected!");
+            setMotionDetected(true); // ✅ Show intrusion alert
+          }
         }
-      }
 
-      // Save the current frame for the next comparison
-      previousFrame = currentFrame;
+        previousFrame = currentFrame;
+        setTimeout(() => {
+          animationFrameRef.current = requestAnimationFrame(processFrame);
+        }, 200);
+      };
 
-      // Continue processing frames, but reduce frequency
-      setTimeout(() => {
-        animationFrameRef.current = requestAnimationFrame(processFrame);
-      }, 200); // Process every 200ms instead of every frame
+      requestAnimationFrame(processFrame);
     };
-
-    // Start processing frames
-    animationFrameRef.current = requestAnimationFrame(processFrame);
   };
 
   const compareFrames = (frame1: ImageData, frame2: ImageData): boolean => {
     const len = frame1.data.length;
     let diff = 0;
+    const threshold = 20; // More sensitive
 
-    // Compare pixel data between frames
     for (let i = 0; i < len; i += 4) {
-      const r1 = frame1.data[i];
-      const g1 = frame1.data[i + 1];
-      const b1 = frame1.data[i + 2];
+      const r1 = frame1.data[i], g1 = frame1.data[i + 1], b1 = frame1.data[i + 2];
+      const r2 = frame2.data[i], g2 = frame2.data[i + 1], b2 = frame2.data[i + 2];
 
-      const r2 = frame2.data[i];
-      const g2 = frame2.data[i + 1];
-      const b2 = frame2.data[i + 2];
-
-      // Calculate the difference between RGB values
-      diff += Math.abs(r1 - r2) + Math.abs(g1 - g2) + Math.abs(b1 - b2);
+      const colorDiff = Math.abs(r1 - r2) + Math.abs(g1 - g2) + Math.abs(b1 - b2);
+      diff += colorDiff;
     }
 
-    // Normalize the difference
-    const avgDiff = diff / (len / 4);
-
-    // Trigger motion detection if the difference exceeds a threshold
-    const threshold = 50; // Adjust this value based on sensitivity
-    return avgDiff > threshold;
+    return diff / (len / 4) > threshold;
   };
 
   return (
@@ -175,17 +152,49 @@ const Cctv: React.FC = () => {
           </video>
         )}
 
-        {/* Motion detection alert */}
-        <IonAlert
-          isOpen={motionDetected}
-          onDidDismiss={() => setMotionDetected(false)}
-          header="Intrusion Detected!"
-          message="Motion has been detected in the video feed."
-          buttons={['OK']}
-        />
+        {/* ✅ Custom Intrusion Alert */}
+        {motionDetected && (
+          <div style={styles.overlay}>
+            <div style={styles.modal}>
+              <h2 style={{ color: 'red', fontWeight: 'bold' }}>🚨 Intrusion Detected! 🚨</h2>
+              <p style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                Motion detected in the camera feed!
+              </p>
+              <IonButton color="danger" onClick={() => setMotionDetected(false)}>
+                Dismiss
+              </IonButton>
+            </div>
+          </div>
+        )}
       </IonContent>
     </IonPage>
   );
+};
+
+/* ✅ Styled Intrusion Alert */
+const styles = {
+  overlay: {
+    position: 'fixed' as 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 9999,
+  },
+  modal: {
+    backgroundColor: '#fff',
+    padding: '25px',
+    borderRadius: '10px',
+    border: '4px solid red',
+    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.5)',
+    textAlign: 'center' as 'center',
+    maxWidth: '350px',
+    width: '90%',
+  },
 };
 
 export default Cctv;
